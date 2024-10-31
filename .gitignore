@@ -1,0 +1,18 @@
+__pycache__
+.venv
+.idea
+build
+dist
+input
+tmp
+tmp_*
+config.ini
+*.spec
+*.csv
+*.txt
+*.pdf
+
+# Ausnahme für gewisse Dateien
+!requirements.txt
+!KORREKTUR_Vorlage.csv
+!PSP_PLOT_Vorlage.csv

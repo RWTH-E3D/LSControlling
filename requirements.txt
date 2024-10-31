@@ -1,0 +1,5 @@
+pandas==2.2.3
+numpy==2.1.1
+matplotlib==3.9.2
+reportlab==4.2.5
+svglib==1.5.1
