@@ -100,9 +100,11 @@ Hierzu bitte folgendermaßen vorgehen:
 
 Python-Terminal öffnen und folgendes ausführen:
 - `pip install pyinstaller`
-- `pyinstaller.exe --onefile .\lscontrolling.py`
+- `pyinstaller.exe --onedir --clean .\lscontrolling.py`
 
-Anschließend wird die Datei `lscontrolling.exe` im Verzeichnis `dist` erstellt. Diese Datei
+Anschließend wird ein Ordner `lscontrolling` im Verzeichnis `dist` erstellt. In diesem Ordner liegt eine Datei 
+`lscontrolling.exe` und ein weiterer Ordner `_internal` der ignoriert werden kann (aber nicht gelöscht werden darf,
+da er alle benötigten, internen Bibliotheken enthält). Dieser Ordner 
 kann verteilt und ohne Python genutzt werden. Voraussetzung ist, dass in dem gleichen
 Ordner, in dem die Datei liegt, auch das Verzeichnis `input` mit den, wie oben
 angegebenen Input-Dateien, liegt.

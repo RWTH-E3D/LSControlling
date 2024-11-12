@@ -16,3 +16,4 @@ config.ini
 !requirements.txt
 !KORREKTUR_Vorlage.csv
 !PSP_PLOT_Vorlage.csv
+!/dist/lscontrolling.zip
