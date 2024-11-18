@@ -372,6 +372,16 @@ def import_sap_csv(config: LSControllingConfig):
         write_csv(df_kst_merged, ikz + '_Drittmittelkontostand.csv')
         write_csv(df_budget_kst_merged, ikz + '_Kombi_Budget_Drittmittelkontostand.csv')
 
+    # --- Datensatz verfremden für Testzwecke (derzeit deaktiviert; zum Aktivieren den Kommentar vor return entfernen
+    # Funktion zum Hinzufügen von Rauschen
+    def add_noise_to_numbers(df):
+        for column in df.select_dtypes(include=[np.number]).columns:
+            noise = np.random.uniform(-0.25, 0.25, df[column].shape)
+            df[column] = df[column] * (1 + noise)
+        return df
+    # return "000000", add_noise_to_numbers(df_budget_kst_merged)
+    # --- Ende Verfremdung für Testzwecke
+
     return ikz, df_budget_kst_merged
 
 
