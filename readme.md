@@ -5,7 +5,7 @@
 Das Skript wurde in Python 3.11 geschrieben und kann zur Datenverarbeitung, -filterung und -aggregation 
 von RWTH SAP Berichtsdaten benutzt werden und soll eine Grundlage für die Zahlenermittlung
 für das Lehrstuhl-Controlling der Fakultät 3 liefern. Anforderung ist, dass
-Zugang zu drei SAP Berichten als .csv exportiert vorliegt.
+Zugang zu vier SAP Berichten als .csv exportiert vorliegt.
 
 ## Vorgehens- und Berechnungsweise
 
@@ -13,7 +13,7 @@ Für das Controlling soll möglichst viel Logik auf SAP-Auswertungen verlagert w
 
 Das Programm benötigt vier Eingangsdaten aus SAP für die gesamte Finanzstelle: Stammdaten, Budgets, Drittmittelkontostand und Obligos. Aus den Stammdaten können die Laufzeit der PSP-Elemente sowie die Art der Geldgeber extrahiert werden. Das Budget gibt das zur Verfügung stehende Budget an, wobei der Budgetrest aus dem Vorjahr als End-Budget des Vorjahres betrachtet wird. Eventuelle Festlegungen müssen hiervon noch abgezogen werden, da diese dort nicht berücksichtigt sind. Für einige Projektarten ist das Budget jedoch nicht aussagekräftig in Bezug auf die tatsächlichen Ein- und Ausgaben. Hierfür wird der Drittmittelkontostand herangezogen, welcher pro Projekt kumulativ über die Jahre aufaddiert wird, um den Kontostand am Ende des jeweiligen Jahres zu ermitteln. Existiert dieser für ein PSP-Element, wird der Drittmittelkontostand übernommen; andernfalls wird der aus dem Budget ermittelte Kontostand für weitere Auswertungen verwendet.
 
-Anschließend erstellt das Skript standardmäßig einen PDF-Bericht, einen detaillierteren Textbericht sowie eine CSV-Datei mit einer Projektübersicht zum Ende des letzten Jahres. Diese Dateien umfassen dann die entsprechend den oben genannten Vorgaben erzeugten Kontostände, entweder nach Projektart aggregiert und nach Jahren ausgewertet oder nach Jahren aggregiert, um den aktuellen Zustand der Projekte am letzten Tag des entsprechenden Jahres widerzugeben.
+Anschließend erstellt das Skript standardmäßig einen PDF-Bericht, einen detaillierteren Textbericht sowie eine CSV-Datei mit einer Projektübersicht zum Ende des letzten Jahres. Diese Dateien umfassen dann die entsprechend, den oben genannten Vorgaben erzeugten Kontostände, entweder nach Projektart aggregiert und nach Jahren ausgewertet oder nach Jahren aggregiert, um den aktuellen Zustand der Projekte am letzten Tag des entsprechenden Jahres widerzugeben.
 
 Es ist vorgesehen, dass der PDF-Bericht der Leitung der Einrichtung zur Unterschrift vorgelegt werden kann. Der detailliertere Textbericht oder die CSV-Datei sind eher für buchhalterische Überprüfungen und Nachvollziehbarkeit gedacht. 
 
@@ -44,6 +44,16 @@ Dieser Bericht umfasst alle Budgetdaten. Er wird folgendermaßen erzeugt:
 - Datei mit Namen `WFI_001_FC_BUDGET_V1.csv` wird erzeugt
 - in den Ordner `input` kopieren
 
+### `input/WPSM_004_KSD.csv`
+Dieser Bericht umfasst alle Drittmittelkontostände. Er wird folgendermaßen erzeugt:
+- SAP Berichtsportal öffnen
+- in Finanzberichte wechseln
+- Finanzcockpit mit aktuellem Jahr und der gewünschten Kostenstelle öffnen
+- Rechtsklick → Springen → "Finanzstelle | Drittm. Kontostand"
+- im neuen Bericht Rechtsklick → Verteilen und exportieren → Nach CSV exportieren
+- Datei mit Namen `WPSM_004_KSD.csv` wird erzeugt
+- in den Ordner `input` kopieren
+
 ### `input/WFI_001_FC_OBLIGOS_V1.csv`
 Dieser Bericht umfasst alle bestehenden Festlegungen. Er wird folgendermaßen erzeugt:
 - SAP Berichtsportal öffnen
@@ -53,17 +63,6 @@ Dieser Bericht umfasst alle bestehenden Festlegungen. Er wird folgendermaßen er
 - im neuen Bericht bei "Jahr" bitte "Alle Werte anzeigen" auswählen
 - anschließend Rechtsklick → Verteilen und exportieren → Nach CSV exportieren
 - Datei mit Namen `WFI_001_FC_OBLIGOS_V1.csv` wird erzeugt
-- in den Ordner `input` kopieren
-
-
-### `input/WPSM_004_KSD.csv`
-Dieser Bericht umfasst alle Drittmittelkontostände. Er wird folgendermaßen erzeugt:
-- SAP Berichtsportal öffnen
-- in Finanzberichte wechseln
-- Finanzcockpit mit aktuellem Jahr und der gewünschten Kostenstelle öffnen
-- Rechtsklick → Springen → "Finanzstelle | Drittm. Kontostand"
-- im neuen Bericht Rechtsklick → Verteilen und exportieren → Nach CSV exportieren
-- Datei mit Namen `WPSM_004_KSD.csv` wird erzeugt
 - in den Ordner `input` kopieren
 
 ### `input/PLOT_PSP.csv` (nicht zwingend erforderlich)
@@ -93,10 +92,10 @@ Pandas, Matplotlib, Reportlab usw. Zur kompletten Installation der benötigten P
 Im Anschluss kann das Skript durch den Aufruf von `python lscontrolling.py` gestartet werden. Der Ordner `input` muss
 dabei auf der gleichen Ebene liegen, wie die `lscontrolling.py`.
 
-### Installation ohne Python-Kenntnisse
+### Vorbereitung zur Nutzung ohne Python-Installation auf anderen Rechnern
 
-Das Skript kann ebenfalls auf einem externen Rechner als `.exe` kompiliert werden. 
-Hierzu bitte folgendermaßen vorgehen:
+Das Skript kann ebenfalls auf einem externen Rechner (der nach der oberen Beschreibung Python installier hat) als 
+`.exe` kompiliert werden. Hierzu bitte folgendermaßen vorgehen:
 
 Python-Terminal öffnen und folgendes ausführen:
 - `pip install pyinstaller`
@@ -109,22 +108,28 @@ kann verteilt und ohne Python genutzt werden. Voraussetzung ist, dass in dem gle
 Ordner, in dem die Datei liegt, auch das Verzeichnis `input` mit den, wie oben
 angegebenen Input-Dateien, liegt.
 
+Zur einfachen Anwendung wurde das Skript bereits kompiliert und liegt unter `dist/lscontrolling.zip` hier an. Diese ZIP
+Datei kann für den direkten Einsatz ohne Python genutzt werden und wurde nach dem vorher beschriebenen Vorgehen
+erstellt. Zum Nutzen, die Datei `lscontrolling.zip` herunterladen und Inhalt extrahieren. Anschließend den Ordner 
+`input` wie oben angegeben ablegen und das Programm ausführen. 
+
+
 ## Berichte und Dateien
 
 Vom Skript her werden standardmäßig 3 Dateien erzeugt:
-- ein PDF-Bericht (als Zusammenfassung und Übersicht für Entscheidungsträger)
+- ein PDF-Bericht (als Zusammenfassung und Übersicht für Entscheidungsträger*innen)
 - ein Text-Bericht (mit weiteren Details für Personen aus der Buchhaltung und zum Nachvollziehen von einzelnen Kontoständen)
 - eine CSV-Datei (Detailkontostände am letzten Tag des Vorjahres, um automatisiert weitere Auswertungen zu ermöglichen)
 
 Der PDF-Bericht bietet dabei eine Zusammenfassung über die gesamte IKZ, gruppiert nach Projektarten und ggf. unterteilt
 in Sammelkonten und Einzelkonten die bis zum 30.06. des Vorjahres abgeschlossen sind oder derzeit noch laufen (basierend 
-auf dem in SAP angegebenen Projektende).
+auf dem in SAP gegebenen Projektende).
 
 In der PDF-Zusammenfassungstabelle auf der letzten Berichtsseite sind die Summen eingefärbt, um eine bessere 
 Übersichtlichkeit zu ermöglichen. Dabei gilt folgende Vereinbarung:
-- in Grün werden Zahlen dargestellt, die einen summierte positiven Kontostand aufweisen
+- in Grün werden Zahlen dargestellt, die einen summierten positiven Kontostand aufweisen
 - in Orange werden Zahlen dargestellt, die einen negativen Kontostand bei den noch aktuell laufenden Projekten (also Projekten
-mit einem SAP-Projektende, das noch nicht erreicht ist). Diese Zahlen deuten an, dass es ggf. zu Problemen kommen kann,
+mit einem SAP-Projektende, das noch nicht erreicht ist) aufweisen. Diese Zahlen deuten an, dass es ggf. zu Problemen kommen kann,
 aufgrund eines negativen Kontostandes. Dies kann aber durch noch ausstehende Zahlungen von Fördermittelgebern noch ausgeglichen werden.
 - in Rot werden Zahlen dargestellt, die einen negativen Kontostand bei Sammelkonten oder bei Konten, deren SAP Projektende
 bereits mehr als ein halbes Jahr vergangen ist. Es kann sein, dass noch Ausgleichszahlungen anstehen, aber das sollte detailliert
@@ -137,7 +142,7 @@ die Möglichkeit das Skript per Konfigurationsdatei anzupassen. Hierzu muss im g
 `config.ini` abgelegt werden. Innerhalb dieser Datei können Anpassungen an der Vorgehensweise des Skriptes vorgenommen 
 werden. Liegt diese Datei nicht vor, werden die Standardeinstellungen im Skript genutzt. Die Datei `template_config.ini`
 enthält alle derzeit möglichen Einstellungsschlüssel, die manuell eingestellt werden können. Sollten Schlüsselwörter 
-nicht vorkommen, werden die entsprechenden Standardwerte genutzt.
+nicht vorkommen, werden die entsprechend vordefinierten Standardwerte genutzt.
 
 
-Bei Fragen oder Anmerkungen bitte an [J. Frisch](mailto:frisch@e3d.rwth-aachen.de) schreiben.
+Bei Fragen oder Anmerkungen bitte bei [J. Frisch](mailto:frisch@e3d.rwth-aachen.de) melden.
