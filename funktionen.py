@@ -62,7 +62,8 @@ class LSControllingConfig:
             'csv_detailplot': 'input/PSP_PLOT.csv',
             'rm_beendet': True,
             'rm_current_year': True,
-            'prt_raw': False
+            'prt_raw': False,
+            'obfuscated': False
         }
 
         if config_file and os.path.exists(config_file):
@@ -372,17 +373,26 @@ def import_sap_csv(config: LSControllingConfig):
         write_csv(df_kst_merged, ikz + '_Drittmittelkontostand.csv')
         write_csv(df_budget_kst_merged, ikz + '_Kombi_Budget_Drittmittelkontostand.csv')
 
-    # --- Datensatz verfremden für Testzwecke (derzeit deaktiviert; zum Aktivieren den Kommentar vor return entfernen
-    # Funktion zum Hinzufügen von Rauschen
-    def add_noise_to_numbers(df):
-        for column in df.select_dtypes(include=[np.number]).columns:
-            noise = np.random.uniform(-0.25, 0.25, df[column].shape)
-            df[column] = df[column] * (1 + noise)
-        return df
-    # return "000000", add_noise_to_numbers(df_budget_kst_merged)
-    # --- Ende Verfremdung für Testzwecke
+    # --- Datensatz verfremden für Testzwecke, wenn "obfuscated"-Flag gesetzt
+    if config['obfuscated']:
+        # Funktion zum Hinzufügen von Rauschen
+        def add_noise_to_numbers(df):
+            for column in df.select_dtypes(include=[np.number]).columns:
+                noise = np.random.uniform(-0.25, 0.25, df[column].shape)
+                df[column] = df[column] * (1 + noise)
+            return df
 
-    return ikz, df_budget_kst_merged
+        # Funktion zum Verschleiern der PSP Elemente
+        def obfuscate_psp(df):
+            df['PSP'] = df['PSP'].apply(lambda x: x[:5] + '000000' + x[11:])
+            df['PSPName'] = df['PSPName'].apply(lambda x: 'x' * len(x))
+            return df
+
+        # Verschleierten Datensatz zurückliefern
+        return "000000", obfuscate_psp(add_noise_to_numbers(df_budget_kst_merged))
+    else:
+        # nicht-verfremdeten Datensatz zurückliefern
+        return ikz, df_budget_kst_merged
 
 
 # Daten zum Detailplot extrahieren
