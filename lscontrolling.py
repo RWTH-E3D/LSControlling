@@ -22,7 +22,7 @@ if __name__ == "__main__":
         # --- Datenfilter anwenden -------------------------------------------------------------------------------------
 
         with LogContext("Datenfilterung"):
-            cutoff = datetime(datetime.now().year - 1, 6, 30)  # 30. Juni des Vorjahres als Cutoff nutzen
+            cutoff = datetime(int(max_jahr), 6, 30)  # 30. Juni des letzten Jahres als Cutoff nutzen
             cutoff1 = cutoff + timedelta(days=1)
             df_ikz_sk = nur_sammelkonten(df_ikz)  # nur Sammelkonten
             df_ikz_ek_alle = keine_sammelkonten(df_ikz)  # keine Sammelkonten, alle Einzelkonten

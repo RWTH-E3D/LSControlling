@@ -182,8 +182,11 @@ def not_cont(df, column, select, regex=True):
 
 
 def rem_current_year(df):
-    current_year = str(datetime.now().year)
-    return df[df['Jahr'] != current_year]
+    # Finde das letzte Jahr im Datensatz
+    last_year = df['Jahr'].max()
+
+    # Entferne alle Einträge des letzten Jahres
+    return df[df['Jahr'] != last_year]
 
 
 # laufende Projekte nach cutoff ignorieren
