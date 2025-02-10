@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
         # Daten aus SAP importieren
         with LogContext("Datenimport und -bereinigung"):
-            ikz, df_ikz = import_sap_csv(cfg)
+            ikz, df_ikz, rep_dates = import_sap_csv(cfg)
 
         # Jahresspanne der Daten ermitteln
         min_jahr = df_ikz['Jahr'].min()
@@ -84,8 +84,10 @@ if __name__ == "__main__":
         # Berichtsdateien finalisieren schließen
         with LogContext("Finalisieren des Berichtes"):
             txt.signature_lines(ikz)
+            txt.berichts_info(rep_dates)
             txt.finalize()
             pdf.signature_lines(ikz)
+            pdf.berichts_info(rep_dates)
             pdf.finalize()
 
             # Temporäres Verzeichnis löschen

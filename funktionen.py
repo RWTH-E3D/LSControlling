@@ -142,8 +142,9 @@ def check_sap_csv_content(file_path, csv_type):
         first_line = next(reader)  # Liest die erste Zeile
         tp = first_line[1]
         expected_value = expected_values[csv_type]
+        second_line = next(reader)
         if tp == expected_value:
-            return True
+            return "Datensatz " + expected_value + " vom " + second_line[1]
         else:
             raise Exception(f"{file_path} enthält nicht den erwarteten Inhalt '{expected_value}' sondern '{tp}'")
 
@@ -243,10 +244,11 @@ def import_sap_csv(config: LSControllingConfig):
 
     daten = ['stammdaten', 'budget', 'obligo', 'kst']
 
-    # Prüfen, ob die Header in den CSV-Dateien geprüft werden sollen
+    # Prüfen, ob die Header in den CSV-Dateien geprüft werden sollen. Wenn ja, ebenfalls Erstelldatum zurückliefern
+    rep_date = ""
     for d in daten:
         if config[f'check_{d}']:
-            check_sap_csv_content(config[f'csv_{d}'], d)
+            rep_date += str(check_sap_csv_content(config[f'csv_{d}'], d)) + "\n"
 
     # CSV-Dateien laden
     df_stammdaten = load_csv_with_dynamic_header(config['csv_stammdaten'], config['header_stammdaten'], cv_stammdaten)
@@ -392,10 +394,10 @@ def import_sap_csv(config: LSControllingConfig):
             return df
 
         # Verschleierten Datensatz zurückliefern
-        return "000000", obfuscate_psp(add_noise_to_numbers(df_budget_kst_merged))
+        return "000000", obfuscate_psp(add_noise_to_numbers(df_budget_kst_merged)), ""
     else:
         # nicht-verfremdeten Datensatz zurückliefern
-        return ikz, df_budget_kst_merged
+        return ikz, df_budget_kst_merged, rep_date
 
 
 # Daten zum Detailplot extrahieren
@@ -492,6 +494,11 @@ class TXTReport:
                     "mich vor Unterschrift mit dem Dekanat abgestimmt.\n\n\n\n")
         self.append("______________________________________________________\n")
         self.append(f"Datum und Unterschrift der Leitung der IKZ {ikz}\n")
+
+    def berichts_info(self, dates):
+        if dates != "":
+            self.append("\n\nInformationen zu den Ausgangsberichten\n")
+            self.append(dates)
 
     def finalize(self):
         self.txt.close()
@@ -624,6 +631,15 @@ class PDFReport:
         p2 = Paragraph("______________________________________________________", self.styles['Normal'])
         p3 = Paragraph(f"Datum und Unterschrift der Leitung der IKZ {ikz}", self.styles['Normal'])
         self.append(KeepTogether([p1, p2, p3]))
+
+    def berichts_info(self, dates):
+        if dates != "":
+            self.append(PageBreak())
+            p1 = Paragraph("Informationen zu den Ausgangsberichten", self.styles['Normal'])
+            p1.spaceAfter = 0.5 * cm
+            date_lines = dates.split('\n')
+            paragraphs = [Paragraph(line.strip(), self.styles['Normal']) for line in date_lines if line.strip()]
+            self.append(KeepTogether([p1] + paragraphs))
 
     def append(self, element):
         self.pdf_elements.append(element)
