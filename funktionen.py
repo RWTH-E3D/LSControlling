@@ -6,7 +6,6 @@ import shutil
 import string
 import csv
 import time
-import logging
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,7 +15,6 @@ import locale
 import urllib.parse
 from datetime import datetime
 from reportlab.graphics import renderPDF
-from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, KeepTogether, PageBreak, TableStyle
@@ -245,10 +243,10 @@ def import_sap_csv(config: LSControllingConfig):
     daten = ['stammdaten', 'budget', 'obligo', 'kst']
 
     # Prüfen, ob die Header in den CSV-Dateien geprüft werden sollen. Wenn ja, ebenfalls Erstelldatum zurückliefern
-    rep_date = ""
+    rep_data = ""
     for d in daten:
         if config[f'check_{d}']:
-            rep_date += str(check_sap_csv_content(config[f'csv_{d}'], d)) + "\n"
+            rep_data += str(check_sap_csv_content(config[f'csv_{d}'], d)) + "\n"
 
     # CSV-Dateien laden
     df_stammdaten = load_csv_with_dynamic_header(config['csv_stammdaten'], config['header_stammdaten'], cv_stammdaten)
@@ -397,7 +395,7 @@ def import_sap_csv(config: LSControllingConfig):
         return "000000", obfuscate_psp(add_noise_to_numbers(df_budget_kst_merged)), ""
     else:
         # nicht-verfremdeten Datensatz zurückliefern
-        return ikz, df_budget_kst_merged, rep_date
+        return ikz, df_budget_kst_merged, rep_data
 
 
 # Daten zum Detailplot extrahieren
@@ -513,7 +511,7 @@ class PDFReport:
         self.styles = getSampleStyleSheet()
         self.pdf_elements = list()
         self.rwth_tab_style = [
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#00549F")),  # HKS 44 - 100 % (Header)
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#00549F")),  # RWTH Blau als Header Hintergrund
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),  # Weißer Text für den Header
             ('ALIGN', (0, 1), (-1, -1), 'RIGHT'),  # Rechtsbündige Ausrichtung aller Werte außer Header
             ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#C7DDF2")),
@@ -594,23 +592,18 @@ class PDFReport:
             kontostand = parse_euro_amount(kontostand_str)
 
             if isinstance(kontostand, float):  # Prüfe, ob es sich um eine Zahl handelt
-                if 'vor' in bemerkung.lower() or 'alle' in bemerkung.lower():
-                    if kontostand < 0:
-                        style.append(('TEXTCOLOR', (2, row_idx), (2, row_idx), colors.red))
+                if kontostand < 0:
+                    color = colors.red if 'vor' in bemerkung.lower() or 'alle' in bemerkung.lower() else colors.orange
+                    style.append(('TEXTCOLOR', (2, row_idx), (2, row_idx), color))
+                    if color == colors.red:
                         negative_red += kontostand
-                    elif kontostand > 0:
-                        style.append(('TEXTCOLOR', (2, row_idx), (2, row_idx), colors.green))
-                        positive_green += kontostand
-
-                elif 'nach' in bemerkung.lower():
-                    if kontostand < 0:
-                        style.append(('TEXTCOLOR', (2, row_idx), (2, row_idx), colors.orange))
+                    else:
                         negative_orange += kontostand
-                    elif kontostand > 0:
-                        style.append(('TEXTCOLOR', (2, row_idx), (2, row_idx), colors.green))
-                        positive_green += kontostand
+                elif kontostand > 0:
+                    style.append(('TEXTCOLOR', (2, row_idx), (2, row_idx), colors.green))
+                    positive_green += kontostand
 
-                total_sum += kontostand
+            total_sum += kontostand
 
         # Einfärben der finalen Summe
         if total_sum > 0:
@@ -719,26 +712,8 @@ class PABericht:
                     img.height *= scale_factor
                     img.scale(scale_factor, scale_factor)
 
-                # Tabelle Kontostand
-                df_pdf = gdf[['Jahr', 'Kontostand']].copy(deep=True)
-                df_pdf['Kontostand'] = df_pdf['Kontostand'].apply(
-                    lambda x: locale.format_string('%.2f €', x, grouping=True))
-                table_data = [df_pdf.columns.tolist()] + df_pdf.values.tolist()
-                tab = Table(table_data)
-                tab.setStyle(self.pdf.rwth_tab_style)
-                tab.spaceAfter = 1 * cm
-                tab.spaceBefore = 1 * cm
-
-                # Mittelwert
-                mean_value = locale.format_string('%.2f €', gdf['Kontostand'].mean(), grouping=True)
-                mean_style = self.pdf.styles["BodyText"]
-                mean_style.alignment = TA_CENTER
-                mean_style.fontName = "Helvetica-BoldOblique"  # Fett und Kursiv
-                mean = Paragraph(f"Mittelwert: {mean_value}", mean_style)
-
                 # Alles in den Bericht packen
-                self.pdf.append(KeepTogether([p_tit, img]))  # Tabelle und Mittelwert im Bericht weglassen
-                # self.pdf.append(KeepTogether([p_tit, img, tab, mean]))
+                self.pdf.append(KeepTogether([p_tit, img]))
 
     # Schreiben der Details in den Textbericht (im PDF ist das nicht integriert, da es zu detailliert ist)
     def detail(self, df, title):
