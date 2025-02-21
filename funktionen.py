@@ -56,7 +56,7 @@ class LSControllingConfig:
             'check_kst': True,
             'header_kst': 4,
             'liste_pa_aufteilung': [68, 69, 90, 91, 92, 99],
-            'liste_pa_keine_aufteilung': [70, 94],
+            'liste_pa_keine_aufteilung': [70, 77, 94],
             'csv_detailplot': 'input/PSP_PLOT.csv',
             'rm_beendet': True,
             'rm_current_year': True,
@@ -750,7 +750,7 @@ class PABericht:
             tab.spaceBefore = 1 * cm
             tab.spaceAfter = 1.5 * cm
             par = Paragraph("Eigene Anmerkungen:", self.pdf.styles['Heading3'])
-            par.spaceAfter = 8 * cm
+            par.spaceAfter = 6 * cm
             self.pdf.append(PageBreak())
             self.pdf.append(KeepTogether([
                 Paragraph(title, self.pdf.styles['Heading2']),
