@@ -165,7 +165,7 @@ def load_csv_with_dynamic_header(file_path, header_row, dtype_map=None):
 # Funktion zum Schreiben von CSV Daten
 def write_csv(df, file_path):
     try:
-        df.to_csv(file_path, sep=";", decimal=',', encoding='latin1', index=False)
+        df.to_csv(file_path, sep=";", decimal=',', encoding='cp1252', index=False)
     except PermissionError:
         print(f"Die Datei {file_path} kann nicht geschrieben werden. Bitte prüfen Sie ob sie nicht noch geöffnet ist!")
 
