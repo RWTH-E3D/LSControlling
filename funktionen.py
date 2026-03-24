@@ -219,7 +219,7 @@ def get_ikz(df):
 
     # Überprüfe die Anzahl der Gruppen
     if len(grouped) > 1:
-        raise Exception(f"Mehr als eine IKZ im Datensatz gefunden! Bitte prüfen! {list(df.columns)}")
+        raise Exception(f"Mehr als eine IKZ im Datensatz gefunden! Bitte prüfen!\n{grouped}")
     else:
         return grouped.index[0]
 
